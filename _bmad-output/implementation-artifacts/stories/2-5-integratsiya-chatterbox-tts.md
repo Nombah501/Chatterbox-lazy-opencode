@@ -3,7 +3,7 @@
 - Epic: 2 — Озвучка и управление TTS
 - Priority: High
 - Estimate: 5 SP
-- Status: review
+- Status: done
 
 ## Краткое описание
 Использовать chatterbox как основной TTS-движок с полным функционалом.
@@ -54,3 +54,31 @@ tts:
 ## Ссылки
 - https://github.com/resemble-ai/chatterbox
 - `_bmad-output/planning-artifacts/epics-user-stories.md` (Story 2.5)
+
+## Tasks
+- [x] Реализовать адаптер ChatterboxProvider.
+- [x] Добавить параметры model, device, voice_prompt_path, voice, speed, tags_enabled.
+- [x] Реализовать CPU fallback с предупреждением.
+- [x] Обработать ошибки и обеспечить неблокирующий вызов.
+
+## Subtasks
+- [x] Создать класс ChatterboxProvider с is_available и synthesize.
+- [x] Добавить кэширование моделей по ключу model:device.
+- [x] Реализовать voice prompt с проверкой файла.
+- [x] Передать voice/speed/tags в model.generate().
+- [x] Добавить try/except в _get_model, _generate_audio, _save_audio.
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Story 2.5 реализована с поддержкой всех требуемых параметров.
+
+## File List
+- src/chatterbox_lazy_opencode/tts/provider.py
+- src/chatterbox_lazy_opencode/config.py
+
+## Change Log
+- 2026-01-07: Story 2.5 закрыта как done (полная интеграция chatterbox).
+
+## Status
+- Выполнено
