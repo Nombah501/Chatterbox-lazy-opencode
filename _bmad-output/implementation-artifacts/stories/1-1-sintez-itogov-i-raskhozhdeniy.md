@@ -24,3 +24,28 @@
 ## Ссылки
 - `_bmad-output/implementation-artifacts/sprint-1-checklists.md` (Story 1.1)
 - `_bmad-output/implementation-artifacts/synthesis-rules-2026-01-07.md`
+
+## Tasks
+- [x] Зафиксировать формат вывода «Итог» и «Расхождения».
+- [x] Реализовать правила синтеза итога по Story 1.1.
+- [x] Реализовать стабильные расхождения и обработку пустых входов.
+
+## Subtasks
+- [x] Ввести нормализацию для сравнения ответов.
+- [x] Сформировать итог 3–5 предложений с учетом расхождений.
+- [x] Сформировать список расхождений в детерминированном порядке.
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализованы правила синтеза итогов и расхождений.
+
+## File List
+- src/chatterbox_lazy_opencode/synthesis.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 1.1.
+- 2026-01-07: Обновлен синтез итога и расхождений по правилам Story 1.1.
+
+## Status
+- На ревью

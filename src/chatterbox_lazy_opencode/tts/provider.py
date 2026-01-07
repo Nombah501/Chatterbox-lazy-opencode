@@ -37,18 +37,30 @@ class ChatterboxProvider:
                 success=False, warnings=["chatterbox недоступен"], audio_path=None
             )
 
-        device = _resolve_device(config.device)
-        if device == "cpu" and config.device == "auto":
-            warnings.append("GPU не найден, используется CPU")
+        try:
+            device = _resolve_device(config.device)
+            if device == "cpu" and config.device == "auto":
+                warnings.append("GPU не найден, используется CPU")
 
-        _configure_hf_token(config.hf_token)
-        model = self._get_model(config.model, device)
-        audio = _generate_audio(model, text, config, warnings)
-        if audio is None:
+            _configure_hf_token(config.hf_token)
+            model = self._get_model(config.model, device)
+        except Exception as exc:
+            warnings.append(f"ошибка инициализации TTS: {type(exc).__name__}")
+            return TtsResult(success=False, warnings=warnings, audio_path=None)
+
+        try:
+            audio = _generate_audio(model, text, config, warnings)
+        except Exception as exc:
+            warnings.append(f"ошибка генерации аудио: {type(exc).__name__}")
             return TtsResult(success=False, warnings=warnings, audio_path=None)
 
         audio_path = Path(output_path)
-        _save_audio(audio_path, audio, getattr(model, "sr", 24000))
+        try:
+            _save_audio(audio_path, audio, getattr(model, "sr", 24000))
+        except Exception as exc:
+            warnings.append(f"ошибка сохранения аудио: {type(exc).__name__}")
+            return TtsResult(success=False, warnings=warnings, audio_path=None)
+
         return TtsResult(success=True, warnings=warnings, audio_path=str(audio_path))
 
     def _get_model(self, model_name: str, device: str) -> Any:

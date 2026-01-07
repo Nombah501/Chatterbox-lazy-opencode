@@ -21,3 +21,29 @@
 
 ## Ссылки
 - `_bmad-output/implementation-artifacts/sprint-1-checklists.md` (Story 2.3)
+
+## Tasks
+- [x] Обеспечить неблокирующий запуск TTS в CLI.
+- [x] Добавить безопасный fallback и предупреждения при сбое TTS.
+- [x] Проверить вывод текста при ошибках/медленном TTS.
+
+## Subtasks
+- [x] Запускать озвучку в фоновом потоке без ожидания.
+- [x] Обработать исключения провайдера и вернуть предупреждения.
+- [x] Печатать предупреждения в stderr без падения CLI.
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализована неблокирующая озвучка и fallback.
+
+## File List
+- src/chatterbox_lazy_opencode/cli.py
+- src/chatterbox_lazy_opencode/tts/provider.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 2.3.
+- 2026-01-07: Неблокирующий TTS и безопасный fallback в CLI/провайдере.
+
+## Status
+- На ревью

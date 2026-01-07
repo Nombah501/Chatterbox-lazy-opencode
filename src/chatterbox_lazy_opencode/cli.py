@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 from pathlib import Path
 
 from chatterbox_lazy_opencode.config import AppConfig, apply_overrides, load_config
@@ -140,12 +141,28 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
         return
 
     provider = ChatterboxProvider()
+    if not provider.is_available():
+        print("[tts] chatterbox недоступен", file=sys.stderr)
+        return
+
     output_file = Path(output_path)
-    result = provider.synthesize(text, config.tts, str(output_file))
-    for warning in result.warnings:
-        print(f"[tts] {warning}", file=sys.stderr)
-    if result.success:
-        print(f"[tts] audio сохранено: {result.audio_path}", file=sys.stderr)
+
+    def _run_tts() -> None:
+        try:
+            result = provider.synthesize(text, config.tts, str(output_file))
+        except Exception as exc:
+            print(
+                f"[tts] ошибка: {type(exc).__name__}",
+                file=sys.stderr,
+            )
+            return
+        for warning in result.warnings:
+            print(f"[tts] {warning}", file=sys.stderr)
+        if result.success:
+            print(f"[tts] audio сохранено: {result.audio_path}", file=sys.stderr)
+
+    thread = threading.Thread(target=_run_tts, name="tts-worker", daemon=True)
+    thread.start()
 
 
 if __name__ == "__main__":

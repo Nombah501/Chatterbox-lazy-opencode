@@ -57,7 +57,7 @@ BMAD Method (локальная установка)
 - Команды OpenCode: `.opencode/command/` (bmad-* сценарии).
 - Агентные профили OpenCode: `.opencode/agent/`.
 - Выходные артефакты BMAD по умолчанию: `_bmad-output/`.
-- Артефакты в `_bmad-output/` редактировать только по явному запросу пользователя.
+
 - Артефакты в `_bmad-output/planning-artifacts/` и `_bmad-output/implementation-artifacts/` создавать через BMAD workflow.
 - Используйте сценарии BMAD по назначению (аналитика, планирование, архитектура, реализация).
 - Сверяйтесь с актуальными шаблонами и манифестами в `_bmad/_config/`.
