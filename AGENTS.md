@@ -8,7 +8,7 @@
 Состояние репозитория
 - Git инициализирован, ветка main отслеживается на origin/main.
 - MVP реализован (13 stories, 42 SP) по Epics 1, 2, 3.
-- Epic 4 спланирован (8 stories, 19 SP) — интеграция с OpenCode.
+- Epic 4 в процессе: Sprint 4 (Stories 4.1-4.4, 10 SP) завершён.
 - BMAD artifacts: `_bmad-output/implementation-artifacts/` (stories, retrospective).
 - CLI готов к ручному тестированию.
 - Репозиторий оформлен для публичного представления: README.md, LICENSE (MIT), .editorconfig.
@@ -20,6 +20,7 @@
 - Scope: Epic 4 (8 stories, 19 SP)
 - Плагин устанавливается глобально: `~/.config/opencode/plugin/cbx-speak.ts`
 - Локальный конфиг плагина: `~/.config/opencode/cbx-speak.env`
+- Проектный конфиг плагина: `.opencode/cbx-speak.json`
 - Поддерживаемые ключи конфига: `CBX_PATH`, `CBX_TTS_HF_TOKEN`, `CBX_TTS_FORCE`, `CBX_LOG_LEVEL`, `CBX_LOG_MAX_BYTES`, `CBX_LOG_MAX_FILES`
 - Логи плагина: `~/.config/opencode/logs/cbx-speak.log` (с ротацией)
 - Зависимость @opencode-ai/plugin уже в `.opencode/package.json`
@@ -67,6 +68,7 @@
 - Обновляйте story-файлы (Tasks/Subtasks, Dev Agent Record, File List, Change Log, Status) только в разрешённых секциях.
 - Проводите retrospective после каждого спринта для фиксации выводов.
 - Закрывайте истории как done только после выполнения всех критериев приемки.
+- Не используйте opencode.json для кастомных секций плагинов — это ломает загрузку OpenCode; используйте отдельные файлы (например, `.opencode/cbx-speak.json`).
 
 Практики рабочего процесса (по статье VentureBeat, 2026-01-05)
 - Используйте параллельные агенты для независимых задач (тесты, рефакторинг, доки).

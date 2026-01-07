@@ -7,10 +7,10 @@
 
 | Story | Название | SP | Приоритет | Status |
 |-------|----------|-----|-----------|--------|
-| 4.1 | Scaffold плагина cbx-speak.ts | 2 | High | backlog |
-| 4.2 | Event handler session.idle | 3 | High | backlog |
-| 4.3 | Shell integration с cbx | 3 | High | backlog |
-| 4.4 | Конфигурация в opencode.json | 2 | High | backlog |
+| 4.1 | Scaffold плагина cbx-speak.ts | 2 | High | done |
+| 4.2 | Event handler session.idle | 3 | High | done |
+| 4.3 | Shell integration с cbx | 3 | High | done |
+| 4.4 | Конфигурация в opencode.json | 2 | High | done |
 
 **Итого: 4 stories, 10 SP**
 
