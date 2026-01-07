@@ -19,6 +19,9 @@
 - Подход: OpenCode Plugin + событие session.idle
 - Scope: Epic 4 (8 stories, 19 SP)
 - Плагин устанавливается глобально: `~/.config/opencode/plugin/cbx-speak.ts`
+- Локальный конфиг плагина: `~/.config/opencode/cbx-speak.env`
+- Поддерживаемые ключи конфига: `CBX_PATH`, `CBX_TTS_HF_TOKEN`, `CBX_TTS_FORCE`, `CBX_LOG_LEVEL`, `CBX_LOG_MAX_BYTES`, `CBX_LOG_MAX_FILES`
+- Логи плагина: `~/.config/opencode/logs/cbx-speak.log` (с ротацией)
 - Зависимость @opencode-ai/plugin уже в `.opencode/package.json`
 
 Порядок работы над Epic 4:
@@ -98,6 +101,10 @@ BMAD Method (локальная установка)
 - Экспорт в файл: `.venv/bin/cbx --text "..." --output result.md`
 - Фильтрация секций: `.venv/bin/cbx --text "..." --show-summary --no-divergences --no-citations`
 - Подробный режим: `.venv/bin/cbx --text "..." --verbose`
+
+Дополнительные флаги CLI
+- Тихий режим (без вывода): `.venv/bin/cbx --quiet ...`
+- Принудительный TTS в неинтерактиве: `.venv/bin/cbx --tts-force ...`
 
 
 Чеклист поиска команд
