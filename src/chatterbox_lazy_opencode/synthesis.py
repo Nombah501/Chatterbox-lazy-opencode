@@ -121,11 +121,13 @@ def _truncate(text: str, limit: int = 160) -> str:
     return f"{text[: limit - 3].rstrip()}..."
 
 
-def _extract_citations(responses: list[AgentResponse]) -> list[str]:
-    citations: list[str] = []
+def _extract_citations(responses: list[AgentResponse]) -> dict[str, list[str]]:
+    citations_by_agent: dict[str, list[str]] = {}
     for response in responses:
         if not response.citations:
+            citations_by_agent.setdefault(response.agent_id, [])
             continue
+        agent_citations: list[str] = []
         for item in response.citations:
             source = item.get("source", "Источник не указан")
             quote = item.get("quote", "").strip()
@@ -135,12 +137,13 @@ def _extract_citations(responses: list[AgentResponse]) -> list[str]:
                     file=sys.stderr,
                 )
                 continue
-            citations.append(f"{response.agent_id}: {source}: {quote}")
-    return citations
+            agent_citations.append(f"{source}: {quote}")
+        citations_by_agent[response.agent_id] = agent_citations
+    return citations_by_agent
 
 
 def _format_output(
-    summary: str, divergences: list[str], citations: list[str] | None
+    summary: str, divergences: list[str], citations: dict[str, list[str]] | None
 ) -> str:
     lines = ["Итог", summary, "", "Расхождения"]
     if divergences:
@@ -149,8 +152,11 @@ def _format_output(
         lines.append("Расхождения отсутствуют")
     if citations is not None:
         lines.extend(["", "Цитаты"])
-        if citations:
-            lines.extend(citations)
-        else:
+        if not citations or not any(citations.values()):
             lines.append("Цитаты отсутствуют")
+        else:
+            for agent_id, agent_citations in citations.items():
+                if agent_citations:
+                    lines.append(f"{agent_id}:")
+                    lines.extend(f"  - {c}" for c in agent_citations)
     return "\n".join(lines)

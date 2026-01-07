@@ -3,7 +3,7 @@
 - Epic: 1 — Прозрачный синтез результатов
 - Priority: High
 - Estimate: 5 SP
-- Status: ready-for-dev
+- Status: done
 
 ## Краткое описание
 Показывать цитаты, подтверждающие расхождения, с указанием источников.
@@ -21,3 +21,27 @@
 
 ## Ссылки
 - `_bmad-output/implementation-artifacts/sprint-1-checklists.md` (Story 1.2)
+
+## Tasks
+- [x] Связать цитаты с расхождениями по agent_id.
+- [x] Улучшить формат секции «Цитаты» для прозрачности.
+- [x] Добавить пометку при отсутствии источников.
+
+## Subtasks
+- [x] Модернизировать _extract_citations() для возврата словаря.
+- [x] Обновить _format_output() для группировки цитат по agent_id.
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализована прозрачная привязка цитат к расхождениям.
+
+## File List
+- src/chatterbox_lazy_opencode/synthesis.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 1.2.
+- 2026-01-07: Обновлен формат цитат с привязкой к agent_id.
+
+## Status
+- Выполнено
