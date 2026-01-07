@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import threading
 from pathlib import Path
@@ -136,8 +137,20 @@ def _build_overrides(args: argparse.Namespace, config: AppConfig) -> dict:
     return {"tts": tts_overrides}
 
 
+def _is_ci_or_noninteractive() -> bool:
+    ci_vars = {"CI", "GITHUB_ACTIONS", "GITLAB_CI", "JENKINS_URL"}
+    for var in ci_vars:
+        if os.environ.get(var):
+            return True
+    return not (sys.stdin.isatty() and sys.stdout.isatty())
+
+
 def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
     if not config.tts.enabled:
+        return
+
+    if _is_ci_or_noninteractive():
+        print("[tts] CI/неинтерактивный режим, озвучка отключена", file=sys.stderr)
         return
 
     provider = ChatterboxProvider()

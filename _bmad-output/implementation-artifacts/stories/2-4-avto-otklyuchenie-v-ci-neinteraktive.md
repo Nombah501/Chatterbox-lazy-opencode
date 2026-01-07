@@ -3,7 +3,7 @@
 - Epic: 2 — Озвучка и управление TTS
 - Priority: High
 - Estimate: 2 SP
-- Status: ready-for-dev
+- Status: done
 
 ## Краткое описание
 Автоматически отключать TTS в CI и неинтерактивных режимах.
@@ -21,3 +21,27 @@
 
 ## Ссылки
 - `_bmad-output/implementation-artifacts/sprint-1-checklists.md` (Story 2.4)
+
+## Tasks
+- [x] Реализовать детектор CI/неинтерактивного режима.
+- [x] Интегрировать проверку перед запуском TTS.
+- [x] Добавить лог/сообщение о причине отключения.
+
+## Subtasks
+- [x] Создать функцию _is_ci_or_noninteractive().
+- [x] Добавить проверку в _maybe_speak().
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализован авто-детект и отключение TTS в CI/неинтерактива.
+
+## File List
+- src/chatterbox_lazy_opencode/cli.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 2.4.
+- 2026-01-07: Реализован детектор CI/неинтерактивного режима и интеграция в CLI.
+
+## Status
+- Выполнено
