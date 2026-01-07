@@ -37,3 +37,6 @@ coverage/
 
 # Misc
 .DS_Store
+
+# Audio
+*.wav
