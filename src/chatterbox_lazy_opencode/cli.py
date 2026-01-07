@@ -40,6 +40,14 @@ def build_parser() -> argparse.ArgumentParser:
 
     parser.add_argument("--verbose", action="store_true")
 
+    parser.add_argument("--output", help="Путь к файлу для экспорта результата")
+    parser.add_argument(
+        "--format",
+        choices=["txt", "md"],
+        default=None,
+        help="Формат файла для экспорта",
+    )
+
     parser.add_argument("--tts", dest="tts_enabled", action="store_true")
     parser.add_argument("--no-tts", dest="tts_enabled", action="store_false")
     parser.set_defaults(tts_enabled=None)
@@ -91,6 +99,9 @@ def main() -> int:
         verbose=args.verbose,
     )
     print(output)
+
+    if args.output:
+        _export_to_file(output, args.output, args.format)
 
     if not tts_text:
         tts_text = output
@@ -201,6 +212,34 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
 
     thread = threading.Thread(target=_run_tts, name="tts-worker", daemon=True)
     thread.start()
+
+
+def _export_to_file(content: str, output_path: str, format: str | None) -> None:
+    output_file = Path(output_path)
+    try:
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        print(
+            f"[export] ошибка создания директории {output_file.parent}: {type(exc).__name__}",
+            file=sys.stderr,
+        )
+        return
+
+    file_format = format
+    if file_format is None:
+        file_format = "md" if output_file.suffix.lower() == ".md" else "txt"
+
+    try:
+        output_file.write_text(content, encoding="utf-8")
+        print(
+            f"[export] результат сохранен: {output_file} ({file_format})",
+            file=sys.stderr,
+        )
+    except Exception as exc:
+        print(
+            f"[export] ошибка сохранения файла: {type(exc).__name__}",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

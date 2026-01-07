@@ -3,7 +3,7 @@
 - Epic: 3 — Сохранение и обмен результатами
 - Priority: Medium
 - Estimate: 3 SP
-- Status: ready-for-dev
+- Status: done
 
 ## Краткое описание
 Экспортировать итог в файл формата txt или md.
@@ -21,3 +21,28 @@
 
 ## Ссылки
 - `_bmad-output/planning-artifacts/epics-user-stories.md` (Story 3.1)
+
+## Tasks
+- [x] Добавить флаг для указания пути к файлу экспорта.
+- [x] Реализовать сохранение результата в файл формата txt или md.
+- [x] Выводить путь к сохраненному файлу в терминал.
+
+## Subtasks
+- [x] Добавить CLI-флаг --output и --format.
+- [x] Создать функцию _export_to_file() для сохранения.
+- [x] Интегрировать экспорт после синтеза.
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализован экспорт результата в txt/md с логированием.
+
+## File List
+- src/chatterbox_lazy_opencode/cli.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 3.1.
+- 2026-01-07: Реализован экспорт результата через флаг --output с форматом txt/md.
+
+## Status
+- Выполнено
