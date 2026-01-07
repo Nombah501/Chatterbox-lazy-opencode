@@ -300,24 +300,6 @@ def _export_to_file(
             file=sys.stderr,
         )
 
-        return
-
-    file_format = format
-    if file_format is None:
-        file_format = "md" if output_file.suffix.lower() == ".md" else "txt"
-
-    try:
-        output_file.write_text(content, encoding="utf-8")
-        print(
-            f"[export] результат сохранен: {output_file} ({file_format})",
-            file=sys.stderr,
-        )
-    except Exception as exc:
-        print(
-            f"[export] ошибка сохранения файла: {type(exc).__name__}",
-            file=sys.stderr,
-        )
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
