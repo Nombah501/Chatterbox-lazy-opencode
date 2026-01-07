@@ -3,7 +3,7 @@
 - Epic: 3 — Сохранение и обмен результатами
 - Priority: Low
 - Estimate: 2 SP
-- Status: ready-for-dev
+- Status: done
 
 ## Краткое описание
 Экспортировать только выбранные секции итога.
@@ -21,3 +21,28 @@
 
 ## Ссылки
 - `_bmad-output/planning-artifacts/epics-user-stories.md` (Story 3.2)
+
+## Tasks
+- [x] Обновить _export_to_file() для фильтрации секций.
+- [x] Сохранять порядок секций в файле.
+- [x] Обеспечить читаемую структуру секций.
+
+## Subtasks
+- [x] Передать флаги show_summary, show_divergences, show_citations в _export_to_file().
+- [x] Реализовать фильтрацию контента по флагам перед сохранением.
+- [x] Сохранять порядок «Итог -> Расхождения -> Цитаты».
+
+## Dev Agent Record
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Реализован экспорт с фильтрацией секций и сохранением порядка.
+
+## File List
+- src/chatterbox_lazy_opencode/cli.py
+
+## Change Log
+- 2026-01-07: Добавлены Tasks/Subtasks для Story 3.2.
+- 2026-01-07: Реализована фильтрация секций в _export_to_file() с сохранением порядка.
+
+## Status
+- Выполнено

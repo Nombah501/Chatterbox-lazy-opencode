@@ -78,10 +78,13 @@ def main() -> int:
     responses: list[AgentResponse] = []
     tts_text = ""
     if args.input:
+        _log_status("Сбор", "Загрузка ответов из файла")
         responses = _load_responses(args.input)
         if not responses:
+            _log_status("Сбор", "Ошибка: нет валидных ответов", error=True)
             print("Нет валидных ответов для синтеза.", file=sys.stderr)
             return 2
+        _log_status("Сбор", "Загружено ответов: {count}".format(count=len(responses)))
     else:
         text = args.text or sys.stdin.read().strip()
         if not text:
@@ -89,7 +92,9 @@ def main() -> int:
             return 2
         responses = [AgentResponse(agent_id=args.agent_id, content=text)]
         tts_text = text
+        _log_status("Сбор", "Загружен текстовый ввод")
 
+    _log_status("Синтез", "Формирование итога и расхождений")
     output = synthesize(
         responses,
         include_citations=args.show_citations or args.include_citations,
@@ -98,10 +103,18 @@ def main() -> int:
         show_citations=args.show_citations,
         verbose=args.verbose,
     )
+    _log_status("Синтез", "Синтез завершен")
     print(output)
 
     if args.output:
-        _export_to_file(output, args.output, args.format)
+        _export_to_file(
+            output,
+            args.output,
+            args.format,
+            show_summary=args.show_summary,
+            show_divergences=args.show_divergences,
+            show_citations=args.show_citations,
+        )
 
     if not tts_text:
         tts_text = output
@@ -173,6 +186,11 @@ def _build_overrides(args: argparse.Namespace, config: AppConfig) -> dict:
     return {"tts": tts_overrides}
 
 
+def _log_status(stage: str, message: str, error: bool = False) -> None:
+    prefix = "!" if error else ">"
+    print(f"[status] {stage}: {message} [{prefix}]", file=sys.stderr)
+
+
 def _is_ci_or_noninteractive() -> bool:
     ci_vars = {"CI", "GITHUB_ACTIONS", "GITLAB_CI", "JENKINS_URL"}
     for var in ci_vars:
@@ -185,12 +203,16 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
     if not config.tts.enabled:
         return
 
+    _log_status("Озвучка", "Запуск TTS")
+
     if _is_ci_or_noninteractive():
+        _log_status("Озвучка", "CI/неинтерактивный режим, озвучка отключена")
         print("[tts] CI/неинтерактивный режим, озвучка отключена", file=sys.stderr)
         return
 
     provider = ChatterboxProvider()
     if not provider.is_available():
+        _log_status("Озвучка", "Ошибка: chatterbox недоступен", error=True)
         print("[tts] chatterbox недоступен", file=sys.stderr)
         return
 
@@ -200,6 +222,7 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
         try:
             result = provider.synthesize(text, config.tts, str(output_file))
         except Exception as exc:
+            _log_status("Озвучка", f"Ошибка: {type(exc).__name__}", error=True)
             print(
                 f"[tts] ошибка: {type(exc).__name__}",
                 file=sys.stderr,
@@ -208,13 +231,21 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
         for warning in result.warnings:
             print(f"[tts] {warning}", file=sys.stderr)
         if result.success:
+            _log_status("Озвучка", f"Аудио сохранено: {result.audio_path}")
             print(f"[tts] audio сохранено: {result.audio_path}", file=sys.stderr)
 
     thread = threading.Thread(target=_run_tts, name="tts-worker", daemon=True)
     thread.start()
 
 
-def _export_to_file(content: str, output_path: str, format: str | None) -> None:
+def _export_to_file(
+    content: str,
+    output_path: str,
+    format: str | None,
+    show_summary: bool = True,
+    show_divergences: bool = True,
+    show_citations: bool = False,
+) -> None:
     output_file = Path(output_path)
     try:
         output_file.parent.mkdir(parents=True, exist_ok=True)
@@ -223,6 +254,52 @@ def _export_to_file(content: str, output_path: str, format: str | None) -> None:
             f"[export] ошибка создания директории {output_file.parent}: {type(exc).__name__}",
             file=sys.stderr,
         )
+        return
+
+    if output_file.exists():
+        print(f"[export] файл будет перезаписан: {output_file}", file=sys.stderr)
+
+    file_format = format
+    if file_format is None:
+        file_format = "md" if output_file.suffix.lower() == ".md" else "txt"
+
+    filtered_content = content
+
+    sections = {
+        "Итог": show_summary,
+        "Расхождения": show_divergences,
+        "Цитаты": show_citations,
+    }
+
+    lines = content.split("\n")
+    filtered_lines: list[str] = []
+    current_section: str | None = None
+    keep_current = False
+
+    for line in lines:
+        if line in sections:
+            current_section = line
+            keep_current = sections[line]
+            if keep_current:
+                filtered_lines.append(line)
+            continue
+        if current_section and keep_current:
+            filtered_lines.append(line)
+
+    filtered_content = "\n".join(filtered_lines)
+
+    try:
+        output_file.write_text(filtered_content, encoding="utf-8")
+        print(
+            f"[export] результат сохранен: {output_file} ({file_format})",
+            file=sys.stderr,
+        )
+    except Exception as exc:
+        print(
+            f"[export] ошибка сохранения файла: {type(exc).__name__}",
+            file=sys.stderr,
+        )
+
         return
 
     file_format = format
