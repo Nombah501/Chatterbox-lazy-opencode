@@ -8,14 +8,25 @@
 Состояние репозитория
 - Git инициализирован, ветка main отслеживается на origin/main.
 - MVP реализован (13 stories, 42 SP) по Epics 1, 2, 3.
+- Epic 4 спланирован (8 stories, 19 SP) — интеграция с OpenCode.
 - BMAD artifacts: `_bmad-output/implementation-artifacts/` (stories, retrospective).
 - CLI готов к ручному тестированию.
 - Репозиторий оформлен для публичного представления: README.md, LICENSE (MIT), .editorconfig.
 
 Следующий этап: интеграция с OpenCode
 - План: `_bmad-output/planning-artifacts/opencode-integration-plan.md`
+- Stories: `_bmad-output/planning-artifacts/epics.md` (Epic 4)
 - Подход: OpenCode Plugin + событие session.idle
-- Scope: Epic 4 (8 stories, 18 SP)
+- Scope: Epic 4 (8 stories, 19 SP)
+- Плагин устанавливается глобально: `~/.config/opencode/plugin/cbx-speak.ts`
+- Зависимость @opencode-ai/plugin уже в `.opencode/package.json`
+
+Порядок работы над Epic 4:
+1. Sprint Planning: `/bmad-bmm-sprint-planning` для Stories 4.1-4.4
+2. Dev Story: `/bmad-bmm-dev-story` начиная с Story 4.1
+3. Реализация: scaffold → event handler → shell integration → config
+4. Тестирование: запустить OpenCode, проверить озвучку
+5. Post-MVP: filtering, /speak command, docs, tests
 
 Политика языка
 - Язык общения: русский.

@@ -59,3 +59,15 @@ development_status:
   3-1-eksport-rezultata-v-fail: done
   3-2-eksport-s-vybrannymi-sektsiyami: done
   epic-3-retrospective: done
+
+  # Sprint 4: Интеграция с OpenCode
+  epic-4: in-progress
+  4-1-scaffold-plagina-cbx-speak-ts: review
+  4-2-event-handler-session-idle: review
+  4-3-shell-integration-s-cbx: in-progress
+  4-4-konfiguratsiya-v-opencode-json: backlog
+  4-5-fallback-speak-command: backlog
+  4-6-smart-tts-filtering: backlog
+  4-7-dokumentatsiya-i-ustanovka: backlog
+  4-8-test-coverage-for-plugin: backlog
+  epic-4-retrospective: optional

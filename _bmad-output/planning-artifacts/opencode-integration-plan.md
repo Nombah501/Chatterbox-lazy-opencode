@@ -1,7 +1,7 @@
 # План интеграции cbx с OpenCode
 
 Дата: 2026-01-07
-Статус: Готов к реализации
+Статус: Stories созданы, готов к Sprint Planning
 
 ## Контекст
 
@@ -82,11 +82,34 @@ export default {
 
 ## Следующие шаги
 
-1. Запустить `/bmad-bmm-create-epics-and-stories` для Epic 4
-2. Sprint planning для OC-1..OC-4 (High priority)
-3. Реализация MVP плагина
-4. Тестирование интеграции
-5. Post-MVP: фильтрация, daemon mode, UX-улучшения
+### После очистки контекста:
+
+1. **Sprint Planning** — `/bmad-bmm-sprint-planning`
+   - Выбрать stories для Sprint 4
+   - Рекомендуемый scope: Stories 4.1-4.4 (High priority, 10 SP)
+
+2. **Dev Story** — `/bmad-bmm-dev-story`
+   - Начать с Story 4.1: Scaffold плагина
+   - Создать `~/.config/opencode/plugin/cbx-speak.ts`
+
+3. **Реализация MVP плагина** (Stories 4.1-4.3)
+   - 4.1: Базовая структура плагина
+   - 4.2: Event handler session.idle
+   - 4.3: Shell integration с cbx
+
+4. **Тестирование интеграции**
+   - Запустить OpenCode
+   - Проверить автоматическую озвучку
+
+5. **Post-MVP** (Stories 4.4-4.8)
+   - Конфигурация, /speak command, filtering, docs, tests
+
+### Важные детали для разработки:
+
+- Плагин устанавливается **глобально**: `~/.config/opencode/plugin/cbx-speak.ts`
+- Зависимость `@opencode-ai/plugin` уже в `.opencode/package.json`
+- cbx должен быть в PATH или указан абсолютный путь
+- Stories описаны в `_bmad-output/planning-artifacts/epics.md` (Epic 4)
 
 ## Риски
 

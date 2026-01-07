@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1]
+stepsCompleted: [1, 2, 3, 4]
 inputDocuments:
   - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/planning-artifacts/architecture.md
   - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/planning-artifacts/ux-design-specification.md
@@ -7,6 +7,8 @@ inputDocuments:
   - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/planning-artifacts/product-brief-Chatterbox lazy opencode-2026-01-07.md
   - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/analysis/research-2026-01-07.md
   - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/analysis/brainstorming-session-2026-01-07.md
+  - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/planning-artifacts/opencode-integration-plan.md
+  - /home/nombah501/VibeCode/Chatterbox lazy opencode/_bmad-output/planning-artifacts/research-opencode-plugin-integration.md
 ---
 
 # Chatterbox lazy opencode - Epic Breakdown
@@ -25,6 +27,12 @@ FR3: Выбор голоса и скорости.
 FR4: Озвучка итогов/завершений задач.
 FR5: Экспорт результатов в файл.
 FR6: Авто-отключение TTS в CI/неинтерактивных режимах.
+FR7: Автоматическая озвучка ответов OpenCode при событии session.idle.
+FR8: Извлечение текста последнего assistant message из сессии.
+FR9: Вызов cbx CLI из TypeScript плагина через shell.
+FR10: Конфигурация плагина в opencode.json (включение/выключение).
+FR11: Fallback /speak команда для ручной озвучки.
+FR12: Фильтрация коротких или технических ответов (smart filtering).
 
 ### NonFunctional Requirements
 
@@ -33,6 +41,9 @@ NFR2: Надежность: при сбое TTS текстовый вывод н
 NFR3: Ресурсы: работа на CPU обязательна, GPU опционально.
 NFR4: Приватность: локальная обработка TTS по умолчанию.
 NFR5: UX-стабильность: не мешать основному потоку OpenCode.
+NFR6: Латентность IPC (TypeScript→Python): <200ms overhead.
+NFR7: Плагин не должен блокировать UX OpenCode.
+NFR8: Совместимость с глобальной установкой (~/.config/opencode/plugin/).
 
 ### Additional Requirements
 
@@ -54,6 +65,14 @@ NFR5: UX-стабильность: не мешать основному пото
 - Пакетирование: npm-пакет + installer-скрипт для Python-зависимостей.
 - В MVP нет внешних сервисов.
 - Минимальный core, функционально близкий к AgentVibes, но для OpenCode.
+- Плагин на TypeScript с @opencode-ai/plugin.
+- Использовать событие session.idle как основной триггер.
+- Доступ к сообщениям через client.session.messages().
+- Shell integration через Bun.$ для вызова cbx.
+- Очередь или skip при активной озвучке (concurrent responses).
+- Глобальная установка плагина для работы в любом проекте.
+- cbx должен быть доступен в PATH или через абсолютный путь.
+- Документация по установке и конфигурации.
 
 ### FR Coverage Map
 
@@ -63,12 +82,19 @@ FR3: Epic 2 — настройка голоса/скорости
 FR4: Epic 2 — озвучка итогов/завершений
 FR5: Epic 3 — экспорт результатов
 FR6: Epic 2 — авто-отключение TTS в CI/неинтерактиве
+FR7: Epic 4 — автоматическая озвучка через session.idle
+FR8: Epic 4 — извлечение assistant message
+FR9: Epic 4 — shell integration cbx
+FR10: Epic 4 — конфигурация плагина
+FR11: Epic 4 — fallback /speak команда
+FR12: Epic 4 — smart filtering
 
 ## Epic List
 
 1) Прозрачный синтез результатов
 2) Озвучка и управление TTS
 3) Сохранение и обмен результатами
+4) Интеграция с OpenCode
 
 ## Epic 1: Прозрачный синтез результатов
 
@@ -211,3 +237,117 @@ So that файл содержит ровно то, что мне нужно.
 **When** я указываю флаги секций при экспорте
 **Then** файл содержит только выбранные секции
 **And** форматирование сохраняет порядок Итог → Расхождения → Цитаты
+
+## Epic 4: Интеграция с OpenCode
+
+Пользователь получает автоматическую озвучку ответов OpenCode без ручных действий, плагин работает глобально в любом проекте.
+
+**FRs covered:** FR7, FR8, FR9, FR10, FR11, FR12
+
+### Story 4.1: Scaffold плагина cbx-speak.ts
+
+As a разработчик,
+I want иметь базовую структуру плагина для OpenCode,
+So that я могу расширять его функциональность.
+
+**Acceptance Criteria:**
+
+**Given** глобальная директория `~/.config/opencode/plugin/`
+**When** я создаю файл `cbx-speak.ts`
+**Then** плагин экспортирует Plugin функцию с правильной сигнатурой
+**And** плагин загружается OpenCode без ошибок
+**And** в логах видно "cbx-speak initialized"
+
+### Story 4.2: Event handler session.idle
+
+As a пользователь OpenCode,
+I want чтобы плагин реагировал на завершение ответа агента,
+So that озвучка запускалась автоматически.
+
+**Acceptance Criteria:**
+
+**Given** плагин установлен и OpenCode запущен
+**When** агент завершает ответ (session.idle)
+**Then** плагин получает событие с sessionId
+**And** плагин извлекает последний assistant message из сессии
+**And** текстовые части сообщения объединяются для озвучки
+
+### Story 4.3: Shell integration с cbx
+
+As a пользователь OpenCode,
+I want чтобы плагин вызывал cbx для озвучки,
+So that я слышал ответы агентов.
+
+**Acceptance Criteria:**
+
+**Given** текст ответа извлечён
+**When** плагин вызывает `cbx --text "..." --tts`
+**Then** cbx озвучивает текст
+**And** ошибки cbx логируются, но не ломают OpenCode
+**And** поддерживается абсолютный путь к cbx
+
+### Story 4.4: Конфигурация в opencode.json
+
+As a пользователь,
+I want управлять плагином через конфигурацию,
+So that я могу включать/выключать озвучку.
+
+**Acceptance Criteria:**
+
+**Given** opencode.json с секцией cbx-speak
+**When** enabled: false
+**Then** плагин не запускает озвучку
+**And** поддерживаются параметры: enabled, cbxPath, minWords
+
+### Story 4.5: Fallback /speak command
+
+As a пользователь OpenCode,
+I want ручную команду для озвучки,
+So that я могу озвучить текст когда автоматика отключена.
+
+**Acceptance Criteria:**
+
+**Given** файл `.opencode/command/speak.md`
+**When** я вызываю `/speak текст`
+**Then** cbx озвучивает указанный текст
+**And** команда работает независимо от настройки enabled
+
+### Story 4.6: Smart TTS filtering
+
+As a пользователь OpenCode,
+I want чтобы короткие и технические ответы не озвучивались,
+So that озвучка не мешала работе.
+
+**Acceptance Criteria:**
+
+**Given** ответ агента получен
+**When** текст короче minWords (default: 50)
+**Then** озвучка не запускается
+**And** ответы с большим количеством кода (>50%) не озвучиваются
+**And** tool calls не озвучиваются
+
+### Story 4.7: Документация и установка
+
+As a пользователь,
+I want понятную инструкцию по установке плагина,
+So that я могу настроить озвучку за 5 минут.
+
+**Acceptance Criteria:**
+
+**Given** README в репозитории
+**When** пользователь следует инструкции
+**Then** плагин устанавливается глобально
+**And** документация включает: требования, установку, конфигурацию, troubleshooting
+
+### Story 4.8: Test coverage for plugin
+
+As a разработчик,
+I want тесты для плагина,
+So that изменения не ломают функциональность.
+
+**Acceptance Criteria:**
+
+**Given** тестовый фреймворк настроен
+**When** запускаются тесты
+**Then** покрыты: event handler, text extraction, filtering, shell call
+**And** используется mock для cbx
