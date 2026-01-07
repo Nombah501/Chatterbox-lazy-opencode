@@ -22,6 +22,24 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--agent-id", default="agent-1")
     parser.add_argument("--include-citations", action="store_true")
 
+    parser.add_argument("--show-summary", dest="show_summary", action="store_true")
+    parser.add_argument("--no-summary", dest="show_summary", action="store_false")
+    parser.set_defaults(show_summary=True)
+
+    parser.add_argument(
+        "--show-divergences", dest="show_divergences", action="store_true"
+    )
+    parser.add_argument(
+        "--no-divergences", dest="show_divergences", action="store_false"
+    )
+    parser.set_defaults(show_divergences=True)
+
+    parser.add_argument("--show-citations", dest="show_citations", action="store_true")
+    parser.add_argument("--no-citations", dest="show_citations", action="store_false")
+    parser.set_defaults(show_citations=False)
+
+    parser.add_argument("--verbose", action="store_true")
+
     parser.add_argument("--tts", dest="tts_enabled", action="store_true")
     parser.add_argument("--no-tts", dest="tts_enabled", action="store_false")
     parser.set_defaults(tts_enabled=None)
@@ -64,7 +82,14 @@ def main() -> int:
         responses = [AgentResponse(agent_id=args.agent_id, content=text)]
         tts_text = text
 
-    output = synthesize(responses, include_citations=args.include_citations)
+    output = synthesize(
+        responses,
+        include_citations=args.show_citations or args.include_citations,
+        show_summary=args.show_summary,
+        show_divergences=args.show_divergences,
+        show_citations=args.show_citations,
+        verbose=args.verbose,
+    )
     print(output)
 
     if not tts_text:

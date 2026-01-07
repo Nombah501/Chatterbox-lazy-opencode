@@ -14,16 +14,35 @@ class AgentResponse:
 
 
 def synthesize(
-    responses: Iterable[AgentResponse], include_citations: bool = False
+    responses: Iterable[AgentResponse],
+    include_citations: bool = False,
+    show_summary: bool = True,
+    show_divergences: bool = True,
+    show_citations: bool = False,
+    verbose: bool = False,
 ) -> str:
     responses = [r for r in responses if r.agent_id and r.content]
     if not responses:
-        return _format_output("Нет данных для синтеза.", [], None)
+        return _format_output(
+            "Нет данных для синтеза.",
+            [],
+            None,
+            show_summary,
+            show_divergences,
+            show_citations,
+        )
+
+    if verbose:
+        show_summary = True
+        show_divergences = True
+        show_citations = True
 
     summary = _build_summary(responses)
     divergences = _find_divergences(responses)
-    citations = _extract_citations(responses) if include_citations else None
-    return _format_output(summary, divergences, citations)
+    citations = _extract_citations(responses) if show_citations else None
+    return _format_output(
+        summary, divergences, citations, show_summary, show_divergences, show_citations
+    )
 
 
 def _build_summary(responses: list[AgentResponse]) -> str:
@@ -143,15 +162,29 @@ def _extract_citations(responses: list[AgentResponse]) -> dict[str, list[str]]:
 
 
 def _format_output(
-    summary: str, divergences: list[str], citations: dict[str, list[str]] | None
+    summary: str,
+    divergences: list[str],
+    citations: dict[str, list[str]] | None,
+    show_summary: bool = True,
+    show_divergences: bool = True,
+    show_citations: bool = False,
 ) -> str:
-    lines = ["Итог", summary, "", "Расхождения"]
-    if divergences:
-        lines.extend(divergences)
-    else:
-        lines.append("Расхождения отсутствуют")
-    if citations is not None:
-        lines.extend(["", "Цитаты"])
+    lines = []
+    if show_summary:
+        lines.append("Итог")
+        lines.append(summary)
+    if show_divergences:
+        if lines:
+            lines.append("")
+        lines.append("Расхождения")
+        if divergences:
+            lines.extend(divergences)
+        else:
+            lines.append("Расхождения отсутствуют")
+    if show_citations and citations is not None:
+        if lines:
+            lines.append("")
+        lines.append("Цитаты")
         if not citations or not any(citations.values()):
             lines.append("Цитаты отсутствуют")
         else:
@@ -159,4 +192,6 @@ def _format_output(
                 if agent_citations:
                     lines.append(f"{agent_id}:")
                     lines.extend(f"  - {c}" for c in agent_citations)
+    if not lines:
+        return "Нет данных для вывода."
     return "\n".join(lines)
