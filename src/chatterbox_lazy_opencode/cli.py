@@ -11,6 +11,19 @@ from chatterbox_lazy_opencode.config import AppConfig, apply_overrides, load_con
 from chatterbox_lazy_opencode.synthesis import AgentResponse, synthesize
 from chatterbox_lazy_opencode.tts.provider import ChatterboxProvider
 
+_QUIET = False
+
+
+def _set_quiet(enabled: bool) -> None:
+    global _QUIET
+    _QUIET = enabled
+
+
+def _emit(message: str, error: bool = False) -> None:
+    if _QUIET:
+        return
+    print(message, file=sys.stderr if error else sys.stdout)
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
@@ -39,6 +52,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.set_defaults(show_citations=False)
 
     parser.add_argument("--verbose", action="store_true")
+    parser.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Отключить вывод текста и статусов",
+    )
 
     parser.add_argument("--output", help="Путь к файлу для экспорта результата")
     parser.add_argument(
@@ -63,6 +81,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.set_defaults(tts_tags=None)
     parser.add_argument("--tts-hf-token", default=None)
     parser.add_argument("--tts-output", default="output.wav")
+    parser.add_argument(
+        "--tts-force",
+        action="store_true",
+        help="Принудительно включить TTS в неинтерактивном режиме",
+    )
 
     return parser
 
@@ -70,6 +93,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
+    _set_quiet(args.quiet)
 
     config = load_config(args.config)
     overrides = _build_overrides(args, config)
@@ -82,13 +106,13 @@ def main() -> int:
         responses = _load_responses(args.input)
         if not responses:
             _log_status("Сбор", "Ошибка: нет валидных ответов", error=True)
-            print("Нет валидных ответов для синтеза.", file=sys.stderr)
+            _emit("Нет валидных ответов для синтеза.", error=True)
             return 2
         _log_status("Сбор", "Загружено ответов: {count}".format(count=len(responses)))
     else:
         text = args.text or sys.stdin.read().strip()
         if not text:
-            print("Нет текста для синтеза.", file=sys.stderr)
+            _emit("Нет текста для синтеза.", error=True)
             return 2
         responses = [AgentResponse(agent_id=args.agent_id, content=text)]
         tts_text = text
@@ -104,7 +128,7 @@ def main() -> int:
         verbose=args.verbose,
     )
     _log_status("Синтез", "Синтез завершен")
-    print(output)
+    _emit(output)
 
     if args.output:
         _export_to_file(
@@ -118,43 +142,39 @@ def main() -> int:
 
     if not tts_text:
         tts_text = output
-    _maybe_speak(tts_text, config, args.tts_output)
+    _maybe_speak(tts_text, config, args.tts_output, args.tts_force)
     return 0
 
 
 def _load_responses(path: str) -> list[AgentResponse]:
     file_path = Path(path)
     if not file_path.exists():
-        print(f"Файл не найден: {file_path}", file=sys.stderr)
+        _emit(f"Файл не найден: {file_path}", error=True)
         return []
 
     try:
         data = json.loads(file_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        print(f"Некорректный JSON: {exc}", file=sys.stderr)
+        _emit(f"Некорректный JSON: {exc}", error=True)
         return []
 
     if not isinstance(data, list):
-        print("Ожидался список ответов в JSON.", file=sys.stderr)
+        _emit("Ожидался список ответов в JSON.", error=True)
         return []
 
     responses: list[AgentResponse] = []
     for index, item in enumerate(data, start=1):
         if not isinstance(item, dict):
-            print(f"Пропуск элемента #{index}: ожидался объект.", file=sys.stderr)
+            _emit(f"Пропуск элемента #{index}: ожидался объект.", error=True)
             continue
         agent_id = str(item.get("agent_id", "")).strip()
         content = str(item.get("content", "")).strip()
         if not agent_id or not content:
-            print(
-                f"Пропуск элемента #{index}: нет agent_id или content.", file=sys.stderr
-            )
+            _emit(f"Пропуск элемента #{index}: нет agent_id или content.", error=True)
             continue
         citations = item.get("citations")
         if citations is not None and not isinstance(citations, list):
-            print(
-                f"Пропуск цитат в элементе #{index}: ожидался список.", file=sys.stderr
-            )
+            _emit(f"Пропуск цитат в элементе #{index}: ожидался список.", error=True)
             citations = None
         responses.append(
             AgentResponse(agent_id=agent_id, content=content, citations=citations)
@@ -188,10 +208,13 @@ def _build_overrides(args: argparse.Namespace, config: AppConfig) -> dict:
 
 def _log_status(stage: str, message: str, error: bool = False) -> None:
     prefix = "!" if error else ">"
-    print(f"[status] {stage}: {message} [{prefix}]", file=sys.stderr)
+    _emit(f"[status] {stage}: {message} [{prefix}]", error=True)
 
 
-def _is_ci_or_noninteractive() -> bool:
+def _is_ci_or_noninteractive(force_tts: bool) -> bool:
+    if force_tts:
+        return False
+
     ci_vars = {"CI", "GITHUB_ACTIONS", "GITLAB_CI", "JENKINS_URL"}
     for var in ci_vars:
         if os.environ.get(var):
@@ -199,21 +222,26 @@ def _is_ci_or_noninteractive() -> bool:
     return not (sys.stdin.isatty() and sys.stdout.isatty())
 
 
-def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
+def _maybe_speak(
+    text: str,
+    config: AppConfig,
+    output_path: str,
+    force_tts: bool,
+) -> None:
     if not config.tts.enabled:
         return
 
     _log_status("Озвучка", "Запуск TTS")
 
-    if _is_ci_or_noninteractive():
+    if _is_ci_or_noninteractive(force_tts):
         _log_status("Озвучка", "CI/неинтерактивный режим, озвучка отключена")
-        print("[tts] CI/неинтерактивный режим, озвучка отключена", file=sys.stderr)
+        _emit("[tts] CI/неинтерактивный режим, озвучка отключена", error=True)
         return
 
     provider = ChatterboxProvider()
     if not provider.is_available():
         _log_status("Озвучка", "Ошибка: chatterbox недоступен", error=True)
-        print("[tts] chatterbox недоступен", file=sys.stderr)
+        _emit("[tts] chatterbox недоступен", error=True)
         return
 
     output_file = Path(output_path)
@@ -223,16 +251,23 @@ def _maybe_speak(text: str, config: AppConfig, output_path: str) -> None:
             result = provider.synthesize(text, config.tts, str(output_file))
         except Exception as exc:
             _log_status("Озвучка", f"Ошибка: {type(exc).__name__}", error=True)
-            print(
+            _emit(
                 f"[tts] ошибка: {type(exc).__name__}",
-                file=sys.stderr,
+                error=True,
             )
             return
         for warning in result.warnings:
-            print(f"[tts] {warning}", file=sys.stderr)
+            _emit(f"[tts] {warning}", error=True)
         if result.success:
             _log_status("Озвучка", f"Аудио сохранено: {result.audio_path}")
-            print(f"[tts] audio сохранено: {result.audio_path}", file=sys.stderr)
+            _emit(
+                f"[tts] audio сохранено: {result.audio_path}",
+                error=True,
+            )
+
+    if force_tts:
+        _run_tts()
+        return
 
     thread = threading.Thread(target=_run_tts, name="tts-worker", daemon=True)
     thread.start()
@@ -250,14 +285,14 @@ def _export_to_file(
     try:
         output_file.parent.mkdir(parents=True, exist_ok=True)
     except Exception as exc:
-        print(
+        _emit(
             f"[export] ошибка создания директории {output_file.parent}: {type(exc).__name__}",
-            file=sys.stderr,
+            error=True,
         )
         return
 
     if output_file.exists():
-        print(f"[export] файл будет перезаписан: {output_file}", file=sys.stderr)
+        _emit(f"[export] файл будет перезаписан: {output_file}", error=True)
 
     file_format = format
     if file_format is None:
@@ -290,14 +325,14 @@ def _export_to_file(
 
     try:
         output_file.write_text(filtered_content, encoding="utf-8")
-        print(
+        _emit(
             f"[export] результат сохранен: {output_file} ({file_format})",
-            file=sys.stderr,
+            error=True,
         )
     except Exception as exc:
-        print(
+        _emit(
             f"[export] ошибка сохранения файла: {type(exc).__name__}",
-            file=sys.stderr,
+            error=True,
         )
 
 
