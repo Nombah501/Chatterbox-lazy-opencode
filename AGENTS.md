@@ -12,6 +12,11 @@
 - CLI готов к ручному тестированию.
 - Репозиторий оформлен для публичного представления: README.md, LICENSE (MIT), .editorconfig.
 
+Следующий этап: интеграция с OpenCode
+- План: `_bmad-output/planning-artifacts/opencode-integration-plan.md`
+- Подход: OpenCode Plugin + событие session.idle
+- Scope: Epic 4 (8 stories, 18 SP)
+
 Политика языка
 - Язык общения: русский.
 - Язык документации: русский (README, инструкции, ADR, пользовательские сообщения).
