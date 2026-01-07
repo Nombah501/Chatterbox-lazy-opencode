@@ -10,7 +10,7 @@
 - BMAD Method установлен и доступен локально.
 - Нет `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml` или `Makefile`.
 - Нет `.cursor/rules/`, `.cursorrules` или `.github/copilot-instructions.md`.
-- На момент записи существуют `logs/`, `.opencode/` и `_bmad/`.
+- На момент записи существуют `logs/`, `.opencode/`, `_bmad/` и `_bmad-output/`.
 
 Политика языка
 - Язык общения: русский.
@@ -55,6 +55,7 @@ BMAD Method (локальная установка)
 - Команды OpenCode: `.opencode/command/` (bmad-* сценарии).
 - Агентные профили OpenCode: `.opencode/agent/`.
 - Выходные артефакты BMAD по умолчанию: `_bmad-output/`.
+- Артефакты в `_bmad-output/` не редактировать вручную без явного запроса.
 - Используйте сценарии BMAD по назначению (аналитика, планирование, архитектура, реализация).
 - Сверяйтесь с актуальными шаблонами и манифестами в `_bmad/_config/`.
 
