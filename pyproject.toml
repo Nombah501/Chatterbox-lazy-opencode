@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chatterbox-lazy-opencode"
+version = "0.1.0"
+description = "CLI инструмент для синтеза ответов агентов с опциональной озвучкой"
+requires-python = ">=3.11"
+dependencies = [
+  "chatterbox-tts>=0.1.2",
+  "torch",
+  "torchaudio"
+]
+
+[project.scripts]
+cbx = "chatterbox_lazy_opencode.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
