@@ -3,7 +3,7 @@
 - Epic: 2 — Озвучка и управление TTS
 - Priority: High
 - Estimate: 3 SP
-- Status: review
+- Status: done
 
 ## Краткое описание
 Озвучка итогов не должна блокировать текстовый поток и должна иметь fallback при сбоях.
@@ -36,6 +36,9 @@
 - Date: 2026-01-07
 - Agent: Codex
 - Notes: Реализована неблокирующая озвучка и fallback.
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Code-review завершен, все критерии приемки выполнены, MEDIUM/LOW issues исправлены.
 
 ## File List
 - src/chatterbox_lazy_opencode/cli.py
@@ -44,6 +47,9 @@
 ## Change Log
 - 2026-01-07: Добавлены Tasks/Subtasks для Story 2.3.
 - 2026-01-07: Неблокирующий TTS и безопасный fallback в CLI/провайдере.
+- 2026-01-07: Code-review прошел без HIGH/CRITICAL issues.
+- 2026-01-07: Исправлены MEDIUM/LOW issues (HF_TOKEN, voice/speed/tags, mkdir, логирование цитат).
+- 2026-01-07: Story 2.3 закрыта как done.
 
 ## Status
-- На ревью
+- Выполнено

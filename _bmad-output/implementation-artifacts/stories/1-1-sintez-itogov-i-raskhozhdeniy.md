@@ -3,7 +3,7 @@
 - Epic: 1 — Прозрачный синтез результатов
 - Priority: High
 - Estimate: 5 SP
-- Status: review
+- Status: done
 
 ## Краткое описание
 Формировать секции «Итог» и «Расхождения» из нескольких ответов агентов в стабильном формате.
@@ -39,6 +39,9 @@
 - Date: 2026-01-07
 - Agent: Codex
 - Notes: Реализованы правила синтеза итогов и расхождений.
+- Date: 2026-01-07
+- Agent: Codex
+- Notes: Code-review завершен, все критерии приемки выполнены, MEDIUM/LOW issues исправлены.
 
 ## File List
 - src/chatterbox_lazy_opencode/synthesis.py
@@ -46,6 +49,9 @@
 ## Change Log
 - 2026-01-07: Добавлены Tasks/Subtasks для Story 1.1.
 - 2026-01-07: Обновлен синтез итога и расхождений по правилам Story 1.1.
+- 2026-01-07: Code-review прошел без HIGH/CRITICAL issues.
+- 2026-01-07: Исправлены MEDIUM/LOW issues (логирование пустых цитат).
+- 2026-01-07: Story 1.1 закрыта как done.
 
 ## Status
-- На ревью
+- Выполнено
