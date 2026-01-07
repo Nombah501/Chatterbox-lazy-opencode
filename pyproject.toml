@@ -6,12 +6,33 @@ build-backend = "setuptools.build_meta"
 name = "chatterbox-lazy-opencode"
 version = "0.1.0"
 description = "CLI инструмент для синтеза ответов агентов с опциональной озвучкой"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+  {name = "Nombah501", email = "nombah501@users.noreply.github.com"}
+]
+keywords = ["cli", "tts", "agents", "synthesis", "chatterbox"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
 requires-python = ">=3.11"
 dependencies = [
   "chatterbox-tts>=0.1.2",
   "torch",
   "torchaudio"
 ]
+
+[project.urls]
+Homepage = "https://github.com/Nombah501/Chatterbox-lazy-opencode"
+Repository = "https://github.com/Nombah501/Chatterbox-lazy-opencode.git"
+Issues = "https://github.com/Nombah501/Chatterbox-lazy-opencode/issues"
 
 [project.scripts]
 cbx = "chatterbox_lazy_opencode.cli:main"
