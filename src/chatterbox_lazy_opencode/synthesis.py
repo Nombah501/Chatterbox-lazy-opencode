@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import sys
 from dataclasses import dataclass
 from typing import Iterable
 
@@ -129,7 +130,11 @@ def _extract_citations(responses: list[AgentResponse]) -> list[str]:
             source = item.get("source", "Источник не указан")
             quote = item.get("quote", "").strip()
             if not quote:
-                quote = "Цитата отсутствует"
+                print(
+                    f"[synthesis] пустая цитата для {response.agent_id}: {source}",
+                    file=sys.stderr,
+                )
+                continue
             citations.append(f"{response.agent_id}: {source}: {quote}")
     return citations
 

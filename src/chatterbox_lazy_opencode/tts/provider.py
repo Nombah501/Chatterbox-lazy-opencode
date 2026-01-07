@@ -87,8 +87,8 @@ class ChatterboxProvider:
 def _configure_hf_token(token: str) -> None:
     if not token:
         return
-    os.environ.setdefault("HF_TOKEN", token)
-    os.environ.setdefault("HUGGINGFACE_HUB_TOKEN", token)
+    os.environ["HF_TOKEN"] = token
+    os.environ["HUGGINGFACE_HUB_TOKEN"] = token
 
 
 def _resolve_device(requested: str) -> str:
@@ -103,13 +103,21 @@ def _resolve_device(requested: str) -> str:
 
 
 def _generate_audio(model: Any, text: str, config: TtsConfig, warnings: list[str]):
+    kwargs: dict[str, Any] = {}
+    if config.voice and config.voice != "default":
+        kwargs["voice"] = config.voice
+    if config.speed != 1.0:
+        kwargs["speed"] = config.speed
+    if config.tags_enabled:
+        kwargs["enable_ssml"] = True
+
     if config.voice_prompt_path:
         prompt_path = Path(config.voice_prompt_path)
         if not prompt_path.exists():
             warnings.append("voice prompt не найден, голос-клон отключен")
-            return model.generate(text)
-        return model.generate(text, audio_prompt_path=str(prompt_path))
-    return model.generate(text)
+            return model.generate(text, **kwargs)
+        return model.generate(text, audio_prompt_path=str(prompt_path), **kwargs)
+    return model.generate(text, **kwargs)
 
 
 def _save_audio(path: Path, audio: Any, sample_rate: int) -> None:
@@ -118,5 +126,16 @@ def _save_audio(path: Path, audio: Any, sample_rate: int) -> None:
     except Exception as exc:
         raise RuntimeError("torchaudio недоступен") from exc
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    ta.save(str(path), audio, sample_rate)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    except Exception as exc:
+        raise RuntimeError(
+            f"не удалось создать директорию {path.parent}: {type(exc).__name__}"
+        ) from exc
+
+    try:
+        ta.save(str(path), audio, sample_rate)
+    except Exception as exc:
+        raise RuntimeError(
+            f"ошибка сохранения аудио в {path}: {type(exc).__name__}"
+        ) from exc
